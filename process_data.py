@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 
 import pandas as pd
 
@@ -6,7 +7,6 @@ from sqlalchemy import create_engine
 
 import sys
 
-# Total of categories allowed on this version
 supported_categories = 36
 category_separator = ';'
 category_value_separator = '-'
@@ -23,12 +23,25 @@ default_categories_file = 'categories.csv'
 default_messages_file = 'messages.csv'
 default_database_file = 'disaster_response.db'
 
-"""
-    Get all the arguments, except the etl script name
-    Given: python process_data.py disaster_messages.csv disaster_categories.csv DisasterResponse.db
-    Will return: ['disaster_messages.csv', 'disaster_categories.csv', 'DisasterResponse.db']
-"""
 def parse_arguments(arguments):
+    
+    """Parses the argument list to a dict with the required parameters.
+
+    Args:
+        arguments (list): The arguments passed to the script.
+        
+    Returns:
+        Return a dict with all parameters except the script name itself.
+
+    Examples:
+        >>> python process_data.py disaster_messages.csv disaster_categories.csv DisasterResponse.db
+        {
+            'messages_filename' : 'disaster_messages.csv',
+            'categories_filename' : 'disaster_categories.csv',
+            'database_filename' : 'DisasterResponse.db'
+        }
+
+    """
     
     log_start(f'Parsing arguments: {arguments}')
 
