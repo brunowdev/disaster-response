@@ -30,7 +30,7 @@ def parse_arguments(arguments):
     Args:
         arguments (list): The arguments passed to the script.
         
-    Returns:
+Parses the argument list to a dict with the required parameters.Parses the argument list to a dict with the required parameters.    Returns:
         Return a dict with all parameters except the script name itself.
 
     Examples:
