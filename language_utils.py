@@ -34,7 +34,7 @@ def has_any_word(text):
 
     split_words = lower_text.split(' ')
     
-    text_words = map(remove_ponctuations, split_words)
+    text_words = map(remove_ponctuation, split_words)
     
     lemm_words = map(lemmatize_word, text_words)
    
