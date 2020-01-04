@@ -28,9 +28,9 @@ def parse_arguments(arguments):
     """Parses the argument list to a dict with the required parameters.
 
     Args:
-        arguments (list): The arguments passed to the script.
-        
-Parses the argument list to a dict with the required parameters.Parses the argument list to a dict with the required parameters.    Returns:
+        arguments (list): The arguments passed to the script. 
+
+    Returns:
         Return a dict with all parameters except the script name itself.
 
     Examples:
@@ -68,6 +68,13 @@ def get_categories_value_from_text(text):
     return list(map(lambda value: int(value), split_category_column_to_list(text, category_value_position)))
 
 def load_data_from_csv(filename, schema = None):
+    """Merge two pandas dataframes based given a key.
+
+    Args:
+        filename (string): The name/path to file.
+        schema (list): Columns to validate the dataframe.
+
+    """
     log_start(f'Reading file: {filename}')
     df = pd.read_csv(filename)
     if schema is not None:
@@ -76,28 +83,25 @@ def load_data_from_csv(filename, schema = None):
     return df
     
 def merge_datasets(df1, df2, key):
-        """Merge two pandas dataframes based given a k.
+    """Merge two pandas dataframes based given a key.
 
     Args:
         df1 (dataframe): The first dataframe to merge.
         df2 (dataframe): The second dataframe to merge.
         key (string): The column used to join both dataframes.
-        
-Parses the argument list to a dict with the required parameters.Parses the argument list to a dict with the required parameters.    Returns:
-        Return a dict with all parameters except the script name itself.
-
-    Examples:
-        >>> python process_data.py disaster_messages.csv disaster_categories.csv DisasterResponse.db
-        {
-            'messages_filename' : 'disaster_messages.csv',
-            'categories_filename' : 'disaster_categories.csv',
-            'database_filename' : 'DisasterResponse.db'
-        }
 
     """
     return pd.merge(df1, df2, on = key)
 
 def expand_categories_to_columns_with_values(df, category_column, categories):
+    """Create a column for every category on categories column with the given value.
+
+    Args:
+        df (dataframe): The dataframe.
+        category_column (string): The name of categories column.
+        categories (list): The sorted list with the name of all existing categories.
+
+    """
     new_df = df.copy()
     new_df[categories] = df[category_column].apply(lambda c: pd.Series(get_categories_value_from_text(str(c))))
     return new_df
