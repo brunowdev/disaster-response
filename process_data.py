@@ -1,10 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+import language_utils as lang_utils
 import pandas as pd
-
 from sqlalchemy import create_engine
-
 import sys
 
 supported_categories = 36
@@ -13,6 +12,7 @@ category_value_separator = '-'
 category_name_position = 0
 category_value_position = 1
 category_column = 'categories'
+minimum_words_to_check_row = 10
 
 expected_arguments_length = 3
 messages_argument_index = 0
@@ -139,6 +139,25 @@ def create_db_file(df, database_filename, table_name = 'messages'):
     engine = create_engine(f'sqlite:///{database_filename}')
     df.to_sql(table_name, engine, index = False, if_exists = 'replace')
     finish_log_success(f'Database created: {database_filename}')
+    
+def remove_rows_with_invalid_words(df):
+    
+    copied_df = df.copy()
+    print(f'Total of rows before cleaning: {len(copied_df)}')
+    
+    copied_df['length'] = copied_df.message.apply(lambda msg: len(msg.strip()))
+    copied_df['words_length'] = copied_df.message.apply(lambda msg: len(msg.strip().split(' ')))
+    
+    possible_bad_rows = copied_df[(copied_df['words_length'] < minimum_words_to_check_row)]
+    bad_data = possible_bad_rows[~possible_bad_rows.message.apply(lang_utils.has_any_word)]
+    
+    # Remove bad rows from the dataframe
+    copied_df = copied_df[~copied_df.id.isin(list(bad_data.id))]
+    
+    print(f'Total of rows after cleaning: {len(copied_df)}')
+    
+    return copied_df.drop(['length', 'words_length'], axis = 1)
+    
 
 def main(args):
     
@@ -160,9 +179,13 @@ def main(args):
     
     print(f'Total of duplicated rows {bold_string("before")} drop: {bold_string(len(full_dataset[full_dataset.duplicated()]))}')
     full_dataset = full_dataset.drop_duplicates(keep = 'first')
-    print(f'Total of duplicated {bold_string("after")} before drop: {bold_string(len(full_dataset[full_dataset.duplicated()]))}')
+    print(f'Total of duplicated rows {bold_string("after")} before drop: {bold_string(len(full_dataset[full_dataset.duplicated()]))}')
     
-    create_db_file(full_dataset, arguments['database_filename'])
+    # Handles bad rows
+    cleaned_df = remove_rows_with_invalid_words(full_dataset)
+
+    # Store the file
+    create_db_file(cleaned_df, arguments['database_filename'])
     
     print('')
     print('Finished ETL script')
