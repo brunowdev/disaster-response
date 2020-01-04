@@ -158,6 +158,17 @@ def remove_rows_with_invalid_words(df):
     
     return copied_df.drop(['length', 'words_length'], axis = 1)
     
+def remove_duplicated_rows(df, keep = 'first'):
+    
+    s_before = len(df[df.duplicated()])
+    print(f'Total of duplicated rows {bold_string("before")} drop: { bold_string(s_before)}')
+    
+    new_df = df.drop_duplicates(keep = keep)
+    
+    s_after = len(new_df[new_df.duplicated()])
+    print(f'Total of duplicated rows {bold_string("after")} before drop: { bold_string(s_after)}')
+    
+    return new_df 
 
 def main(args):
     
@@ -165,21 +176,23 @@ def main(args):
     
     arguments = parse_arguments(args)
     
+    # Loading data
     messages = load_data_from_csv(arguments['messages_filename'])
     categories = load_data_from_csv(arguments['categories_filename'])
     
+    # Merge the data
     merged = merge_datasets(messages, categories, 'id')
     
     # Get the category string from the first row
     category_raw_text = merged.iloc[0].categories
     categories_name = get_categories_name_from_text(category_raw_text)
     
+    # Create a column for each category
     full_dataset = expand_categories_to_columns_with_values(merged, category_column, categories_name)
     full_dataset = full_dataset.drop([category_column], axis = 1)
     
-    print(f'Total of duplicated rows {bold_string("before")} drop: {bold_string(len(full_dataset[full_dataset.duplicated()]))}')
-    full_dataset = full_dataset.drop_duplicates(keep = 'first')
-    print(f'Total of duplicated rows {bold_string("after")} before drop: {bold_string(len(full_dataset[full_dataset.duplicated()]))}')
+    # Remove duplicated rows
+    full_dataset = remove_duplicated_rows(full_dataset)
     
     # Handles bad rows
     cleaned_df = remove_rows_with_invalid_words(full_dataset)
