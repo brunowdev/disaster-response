@@ -76,6 +76,25 @@ def load_data_from_csv(filename, schema = None):
     return df
     
 def merge_datasets(df1, df2, key):
+        """Merge two pandas dataframes based given a k.
+
+    Args:
+        df1 (dataframe): The first dataframe to merge.
+        df2 (dataframe): The second dataframe to merge.
+        key (string): The column used to join both dataframes.
+        
+Parses the argument list to a dict with the required parameters.Parses the argument list to a dict with the required parameters.    Returns:
+        Return a dict with all parameters except the script name itself.
+
+    Examples:
+        >>> python process_data.py disaster_messages.csv disaster_categories.csv DisasterResponse.db
+        {
+            'messages_filename' : 'disaster_messages.csv',
+            'categories_filename' : 'disaster_categories.csv',
+            'database_filename' : 'DisasterResponse.db'
+        }
+
+    """
     return pd.merge(df1, df2, on = key)
 
 def expand_categories_to_columns_with_values(df, category_column, categories):
