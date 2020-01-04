@@ -59,12 +59,40 @@ def parse_arguments(arguments):
     }
 
 def split_category_column_to_list(text, position):
+    """A function to split the category string either as name
+    (the first parameter) or the value (second parameter).
+
+    Args:
+        text (string): The text to split.
+        position (int): The position to get a value (0 or 1).
+
+    """
     return list(map(lambda cat: cat.split(category_value_separator)[position], text.split(category_separator)))
 
 def get_categories_name_from_text(text):
+    """Split the text with categories to a list of categories name.
+
+    Args:
+        text (string): The text to split. 
+        
+    Examples:
+        >>> get_categories_value_from_text('related-1;request-0;offer-0')
+        ['related', 'request', 'offer']
+
+    """
     return split_category_column_to_list(text, category_name_position) 
 
 def get_categories_value_from_text(text):
+    """Split the text with categories to a list of categories value.
+
+    Args:
+        text (string): The text to split.
+        
+    Examples:
+        >>> get_categories_value_from_text('related-1;request-0;offer-0')
+        [1, 0, 0]
+
+    """
     return list(map(lambda value: int(value), split_category_column_to_list(text, category_value_position)))
 
 def load_data_from_csv(filename, schema = None):
