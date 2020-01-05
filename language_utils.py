@@ -1,5 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import nltk
+
+nltk.download('words')
+nltk.download('wordnet')
 
 from nltk.corpus import words
 from nltk.stem import WordNetLemmatizer
