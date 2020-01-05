@@ -93,7 +93,7 @@ def get_categories_value_from_text(text):
         [1, 0, 0]
 
     """
-    return list(map(lambda value: int(value), split_category_column_to_list(text, category_value_position)))
+    return list(map(lambda value: int(value if value == '0' else 1), split_category_column_to_list(text, category_value_position)))
 
 def load_data_from_csv(filename, schema = None):
     """Merge two pandas dataframes based given a key.
