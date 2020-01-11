@@ -64,14 +64,15 @@
     {% endfor %}
 </div>
 
+{% if graphJSON %}
 <script type="text/javascript">
     const graphs = {{graphJSON | safe}};
     const ids = {{ids | safe}};
     for(let i in graphs) {
-        console.log(graphs[i].data)
         Plotly.plot(ids[i], graphs[i].data, graphs[i].layout);
     }
 </script>
+{% endif %}
 
 </body>
 </html>
