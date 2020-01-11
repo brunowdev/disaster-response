@@ -9,6 +9,7 @@ from nltk.tokenize import sent_tokenize, RegexpTokenizer
 from nltk.stem import WordNetLemmatizer
 
 import spacy
+import en_core_web_sm
 from spacy.lang.en.stop_words import STOP_WORDS
 
 # Download some necessary resources
@@ -16,7 +17,7 @@ nltk.download('punkt')
 nltk.download('stopwords')
 
 # Load the us-eng model 
-en_us_model = spacy.load('en_core_web_sm')
+en_us_model = en_core_web_sm.load() # spacy.load('en_core_web_sm')
 
 # Words related to questions on text
 portuguese_question_tokens = [ 'qual', 'onde', 'quando', 'quem', 'como', 'porque', 'por que' ] 
