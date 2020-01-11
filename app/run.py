@@ -11,6 +11,12 @@ from plotly.graph_objs import Bar
 from sklearn.externals import joblib
 from sqlalchemy import create_engine
 
+import sys
+
+sys.path.insert(0, '../models')
+
+import nlp_extractors
+
 app = Flask(__name__)
 
 def tokenize(text):
@@ -25,12 +31,11 @@ def tokenize(text):
     return clean_tokens
 
 # load data
-engine = create_engine('sqlite:///../data/DisasterResponse.db')
-df = pd.read_sql_table('FigureEight', engine)
+engine = create_engine('sqlite:///./../data/DisasterResponse.db')
+df = pd.read_sql_table('messages', engine)
 
 # load model
 model = joblib.load("../models/model.pkl")
-
 
 # index webpage displays cool visuals and receives user input text for model
 @app.route('/')
@@ -80,8 +85,15 @@ def go():
     query = request.args.get('query', '') 
 
     # use model to predict classification for query
-    classification_labels = model.predict([query])[0]
-    classification_results = dict(zip(df.columns[4:], classification_labels))
+    _result = model.predict([query])
+    # print(len(_result[0]))
+    # print(len(list(df.columns[4:])))
+
+    classification_labels = _result[0]
+    _possible_labels = list(df.columns[4:])
+    _possible_labels.pop(_possible_labels.index('child_alone'))
+
+    classification_results = dict(zip(_possible_labels, classification_labels))
 
     # This will render the go.html Please see that file. 
     return render_template(
