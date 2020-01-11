@@ -13,7 +13,7 @@ from sqlalchemy import create_engine
 
 import sys
 
-sys.path.insert(0, '../models')
+sys.path.insert(0, './models')
 
 import nlp_extractors
 
@@ -31,11 +31,11 @@ def tokenize(text):
     return clean_tokens
 
 # load data
-engine = create_engine('sqlite:///./../data/DisasterResponse.db')
+engine = create_engine('sqlite:///./data/DisasterResponse.db')
 df = pd.read_sql_table('messages', engine)
 
 # load model
-model = joblib.load("../models/model.pkl")
+model = joblib.load("./models/model.pkl")
 
 # index webpage displays cool visuals and receives user input text for model
 @app.route('/')
@@ -104,7 +104,7 @@ def go():
 
 
 def main():
-    app.run(host='0.0.0.0', port=3001, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
 
 
 if __name__ == '__main__':
