@@ -41,6 +41,11 @@ def tokenize(text):
 engine = create_engine('sqlite:///./data/DisasterResponse.db')
 df = pd.read_sql_table('messages', engine)
 
+# create the categories dataframe
+df_categories = df[df.columns[4:]].sum().to_frame().reset_index()
+df_categories.columns = ['category', 'total']
+df_categories = df_categories.sort_values(by = ['total'], ascending = False)
+
 # load metrics dataset
 df_metrics = pd.read_csv('./models/linear_model_metrics.csv')
 df_metrics = df_metrics.sort_values(by = ['f1-score' ], ascending = False)
@@ -63,13 +68,21 @@ def index():
 
     # Prepare the data for metrics visualization
     data_metrics = []
-    for metric in ['precision', 'recall', 'f1-score']:
+    for metric in [ 'f1-score']:
         data_metrics.append({
             'name' : metric.title(),
             'type' : 'bar',
             'x' : list(df_metrics.category),
             'y' : list(map(lambda x: np.around(x, 2), df_metrics[metric]))
         })
+
+    # Message distribuition per category
+    categories_metrics = [
+            Bar(
+                x = list(df_categories.category),
+                y = list(df_categories.total)
+            )
+        ]
     
     # create visuals
     graphs = [
@@ -96,19 +109,41 @@ def index():
             }
         },
         {
-            'data' : data_metrics,
+            'data' : categories_metrics,
                 'layout' : {
-                    'title': 'Linear Regression Model Performance',
+                    'title': 'Distribution of Messages Category',
                     'font': {
                         'size': chart_font_size
                     },
                     'xaxis': {
                         'tickangle': tick_rotation,
                         'ticks': 'outside',
-                        'automargin': True
+                        'automargin': True,
+                        'title': 'Category',
                     },
                     'yaxis': {
-                        'ticks': 'outside'
+                        'ticks': 'outside',
+                        'title': 'Count',
+                    },
+                    'barmode': 'group'
+                }
+        },
+        {
+            'data' : data_metrics,
+                'layout' : {
+                    'title': 'F1 - Score of Linear Regression Model',
+                    'font': {
+                        'size': chart_font_size
+                    },
+                    'xaxis': {
+                        'tickangle': tick_rotation,
+                        'ticks': 'outside',
+                        'automargin': True,
+                        'title': 'Category',
+                    },
+                    'yaxis': {
+                        'ticks': 'outside',
+                        'title': 'F1-Score (0 to 1)',
                     },
                     'barmode': 'group'
                 }
