@@ -1,6 +1,7 @@
 import json
 import plotly
 import pandas as pd
+import numpy as np
 
 import nltk
 
@@ -40,8 +41,16 @@ def tokenize(text):
 engine = create_engine('sqlite:///./data/DisasterResponse.db')
 df = pd.read_sql_table('messages', engine)
 
+# load metrics dataset
+df_metrics = pd.read_csv('./models/linear_model_metrics.csv')
+df_metrics = df_metrics.sort_values(by = ['f1-score' ], ascending = False)
+
 # load model
 model = joblib.load("./models/model.pkl")
+
+# Configurations 
+chart_font_size = 18
+tick_rotation = -45
 
 # index webpage displays cool visuals and receives user input text for model
 @app.route('/')
@@ -49,12 +58,20 @@ model = joblib.load("./models/model.pkl")
 def index():
     
     # extract data needed for visuals
-    # TODO: Below is an example - modify to extract data for your own visuals
     genre_counts = df.groupby('genre').count()['message']
     genre_names = list(genre_counts.index)
+
+    # Prepare the data for metrics visualization
+    data_metrics = []
+    for metric in ['precision', 'recall', 'f1-score']:
+        data_metrics.append({
+            'name' : metric.title(),
+            'type' : 'bar',
+            'x' : list(df_metrics.category),
+            'y' : list(map(lambda x: np.around(x, 2), df_metrics[metric]))
+        })
     
     # create visuals
-    # TODO: Below is an example - modify to create your own visuals
     graphs = [
         {
             'data': [
@@ -66,13 +83,35 @@ def index():
 
             'layout': {
                 'title': 'Distribution of Message Genres',
+                'font': {
+                    'size': chart_font_size
+                },
                 'yaxis': {
                     'title': "Count"
                 },
                 'xaxis': {
-                    'title': "Genre"
+                    'title': "Genre",
+                    'categoryorder' : ['news', 'direct', 'social']
                 }
             }
+        },
+        {
+            'data' : data_metrics,
+                'layout' : {
+                    'title': 'Linear Regression Model Performance',
+                    'font': {
+                        'size': chart_font_size
+                    },
+                    'xaxis': {
+                        'tickangle': tick_rotation,
+                        'ticks': 'outside',
+                        'automargin': True
+                    },
+                    'yaxis': {
+                        'ticks': 'outside'
+                    },
+                    'barmode': 'group'
+                }
         }
     ]
     
@@ -92,8 +131,6 @@ def go():
 
     # use model to predict classification for query
     _result = model.predict([query])
-    # print(len(_result[0]))
-    # print(len(list(df.columns[4:])))
 
     classification_labels = _result[0]
     _possible_labels = list(df.columns[4:])
