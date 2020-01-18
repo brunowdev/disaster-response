@@ -4,20 +4,19 @@
 import sys
 
 import pandas as pd
+import pickle
 import nlp_extractors
 
 from sqlalchemy import create_engine
 
-from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer, TfidfVectorizer
-from sklearn.metrics import confusion_matrix, classification_report
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.metrics import classification_report
 
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.pipeline import Pipeline, FeatureUnion
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.multioutput import MultiOutputClassifier
-
-import pickle
 
 expected_arguments_length = 2
 data_argument_index = 0
@@ -28,7 +27,15 @@ random_state = 42
 test_size = .3
 
 def load_data(db_filename):
-
+    """
+    Loads data from the database file.
+    Args:
+        db_filename: path to file
+    Returns:
+        (DataFrame) X: The feature column
+        (DataFrame) Y: Labels
+        (List) labels: The list of target labels
+    """
     print('Loading data...')
 
     engine = create_engine(f'sqlite:///{db_filename}')
@@ -39,16 +46,28 @@ def load_data(db_filename):
     X = df.message
     Y = df[labels]
 
-    Y = Y.drop(['child_alone'], axis = 1)
-    labels.pop(labels.index('child_alone'))
+    # Removes all the categories with less than one sample 
+    df_filtered = df[labels].sum().gt(0).to_frame().reset_index()
+    df_filtered.columns = [ 'category', 'non_zero' ]
+    categories_to_remove = list(df_filtered[df_filtered.non_zero == False]['category'])
+    for category in categories_to_remove:
+        print(f'Warning: Removing the category {category} since it has no samples.')
+        Y = Y.drop([category], axis = 1)
+        labels.pop(labels.index(category))
 
     return X, Y, labels
 
 def create_model():
-
+    """
+    Create a model with the pipeline.
+    Returns:
+        (DataFrame) X: The feature column
+        (DataFrame) Y: Labels
+        (List) labels: The list of target labels
+    """
     print('Creating model...')
 
-    model = LogisticRegression(random_state = random_state, solver = 'lbfgs', cv = 5, max_iter = 1000)
+    model = LogisticRegression(random_state = random_state, solver = 'lbfgs', max_iter = 1000)
 
     pipeline = Pipeline([
         ('features', FeatureUnion([
@@ -76,26 +95,48 @@ def create_model():
         #'classifier__estimator__penalty' : ['l1', 'l2']
     }
 
-    return GridSearchCV(pipeline, param_grid = parameters, n_jobs = -1, verbose = 10)
+    return GridSearchCV(pipeline, cv = 5, param_grid = parameters, n_jobs = -1, verbose = 10)
 
 def evaluate_model(model, X_test, y_test, labels):
-
+    """
+    Evaluates the model with the test data.
+    Args:
+        model: The model
+        X_test: The feature column
+        Y_test: Labels
+        labels: The list of target labels
+    """
     print('Evaluating model...')
 
     y_pred = model.predict(X_test) 
 
     report = classification_report(y_test.values, y_pred, target_names=labels, output_dict = True)
+    print(report)
 
-    df_metrics = pd.DataFrame(list(map(lambda label: map_with_key(report, label), labels)))
+    print('Saving training report...')
+    metrics = list(map(lambda label: extract_category(report, label), labels))
+    df_metrics = pd.DataFrame(metrics)
     df_metrics.to_csv(metrics_filename, index = False)
 
 
-def map_with_key(report, key):
+def extract_category(report, key):
+    """
+    Create a dict from a classification report for a given category.
+    Args:
+        report: The report
+        key: The key to a category on the report
+    """
     result = report.get(key)
     result['category'] = key
     return result
 
 def save_model(model, model_filename):
+    """
+    Save the model to a pickle file.
+    Args:
+        model: The model
+        model_filename: Name/path to save the model
+    """
     print('Saving the model...')
     pickle.dump(model, open(model_filename, 'wb'))
 
