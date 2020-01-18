@@ -51,7 +51,7 @@ df_metrics = pd.read_csv('./models/linear_model_metrics.csv')
 df_metrics = df_metrics.sort_values(by = ['f1-score' ], ascending = False)
 
 # load model
-model = joblib.load("./models/model.pkl")
+model = joblib.load("./models/classifier.pkl")
 
 # Configurations 
 chart_font_size = 18
