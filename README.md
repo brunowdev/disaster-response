@@ -96,9 +96,9 @@ Consider changing the `train_classifier.py` to remove some parameters from the G
 
 #### The NLP
 
-- I've used the Spacy with nltk since spacy has more stop words for English;
+- I've used the [Spacy](https://spacy.io/usage/models) with nltk since spacy has more stop words for English;
 - I also manually added some stop words for Portuguese/Spanish, since I've seen several messages in these languages;
-- **QuestionExtractor**: Extracts the feature if the message contains a question. I've also used Space here.
+- **QuestionExtractor**: Extracts the feature if the message contains a question. I've also used Spacy here.
 - **NumericDigitExtractor**: Extracts the feature if the message contains any digit.
 
 #### Translation
