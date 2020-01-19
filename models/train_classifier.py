@@ -67,7 +67,7 @@ def create_model():
     """
     print('Creating model...')
 
-    model = LogisticRegression(random_state = random_state, solver = 'lbfgs', max_iter = 1000)
+    model = LogisticRegression(random_state = random_state, solver = 'lbfgs', max_iter = 1000, penalty = 'l2')
 
     pipeline = Pipeline([
         ('features', FeatureUnion([
@@ -85,14 +85,12 @@ def create_model():
     ])
 
     parameters = {
-        # 'features__text_pipeline__vect__ngram_range': ((1, 1), (1, 2)),
-        # 'features__text_pipeline__vect__max_df': (0.5, 0.75, 1.0),
-        # 'features__text_pipeline__vect__max_features': (None, 5000, 10000),
-        # 'features__text_pipeline__tfidf__use_idf': (True, False),
+        'features__text_pipeline__vect__ngram_range': ((1, 1), (1, 2)),
+        'features__text_pipeline__vect__max_df': (0.5, 0.75, 1.0),
+        'features__text_pipeline__vect__max_features': (None, 5000, 10000),
         'features__text_pipeline__tfidf__norm': ('l1', 'l2'),
-        #'classifier__estimator__n_estimators': [50, 100, 200],
-        #'classifier__estimator__C': [5, 10],
-        #'classifier__estimator__penalty' : ['l1', 'l2']
+        'classifier__estimator__multi_class': ['multinomial'],
+        'classifier__estimator__C': [ 0.001, 0.01 , 0.1 , 1, 10 ]
     }
 
     return GridSearchCV(pipeline, cv = 5, param_grid = parameters, n_jobs = -1, verbose = 10)
@@ -117,6 +115,9 @@ def evaluate_model(model, X_test, y_test, labels):
     metrics = list(map(lambda label: extract_category(report, label), labels))
     df_metrics = pd.DataFrame(metrics)
     df_metrics.to_csv(metrics_filename, index = False)
+
+    print(f'Best score: {model.best_score_}')
+    print(f'Best parameters: {model.best_params_}')
 
 
 def extract_category(report, key):
