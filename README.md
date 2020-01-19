@@ -69,7 +69,7 @@ python app/run.py
 
 To execute the pipeline:
 <pre>
-python process_data.py disaster_messages.csv disaster_categories.csv DisasterResponse.db
+python process_data.py messages.csv categories.csv DisasterResponse.db
 </pre>
 
 To train the model:
