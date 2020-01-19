@@ -53,7 +53,7 @@ This project uses NLP to classify disaster related messages. The dataset is prov
 │   └── nlp_extractors.py-----------------# Script with a set of functions related to NLP (Tokenizers, extractors) 
 │   └── classifier.pkl--------------------# The trained model
 │   └── linear_model_metrics.csv----------# The file with training score for each category (precision, recall, f1-score)
-├── models
+├── images
 │   └── Images for the documentation
 </pre>
 
